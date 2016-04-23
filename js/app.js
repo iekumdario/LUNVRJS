@@ -7,7 +7,7 @@ var canvas = document.getElementById("renderCanvas");
             var scene = new BABYLON.Scene(engine);
         
             // This creates and positions a free camera (non-mesh)
-            var camera = new BABYLON.VRDeviceOrientationFreeCamera ("Camera", new BABYLON.Vector3 (-6.7, 1.2, -1.3), scene, 0);
+            var camera = new BABYLON.VRDeviceOrientationFreeCamera ("Camera", new BABYLON.Vector3 (0, 0, -15), scene, 0);
         
             // This targets the camera to scene origin
             camera.setTarget(BABYLON.Vector3.Zero());
@@ -16,19 +16,23 @@ var canvas = document.getElementById("renderCanvas");
             camera.attachControl(canvas, true);
         
             // This creates a light, aiming 0,1,0 - to the sky (non-mesh)
-            var light = new BABYLON.HemisphericLight("light1", new BABYLON.Vector3(0, 1, 0), scene);
+            var light = new BABYLON.HemisphericLight("light1", new BABYLON.Vector3(-5, 5, -2), scene);
         
             // Default intensity is 1. Let's dim the light a small amount
             light.intensity = 0.7;
         
             // Our built-in 'sphere' shape. Params: name, subdivs, size, scene
-            var sphere = BABYLON.Mesh.CreateSphere("sphere1", 16, 2, scene);
+            var sphere = BABYLON.Mesh.CreateSphere("sphere1", 16, 15, scene);
         
             // Move the sphere upward 1/2 its height
             sphere.position.y = 1;
             var materialSphere1 = new BABYLON.StandardMaterial("texture1", scene);
             //materialSphere1.diffuseColor = new BABYLON.Color3(0, 1, 0.35);
             materialSphere1.diffuseTexture = new BABYLON.Texture("js/texture/moon.jpg", scene);
+            materialSphere1.bumpTexture = new BABYLON.Texture("js/texture/moonbump.png", scene);
+            materialSphere1.specularPower = 100;
+			//materialSphere1.emissiveColor = new BABYLON.Color3(0.18, 0.60, .89);
+
             sphere.material = materialSphere1;
         
             return scene;
