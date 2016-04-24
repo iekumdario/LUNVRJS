@@ -16,6 +16,15 @@
     left: 30px;
     top: 30px;
     color: white;
+    font-size: xx-small;
+  }
+
+  #status{
+    position: absolute;
+    left: 30px;
+    top: 50px;
+    color: white;
+    font-size: x-small;
   }
 
   .crosshair {
