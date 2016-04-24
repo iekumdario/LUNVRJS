@@ -13,18 +13,26 @@
 
   #phase{
     position: absolute;
-    left: 30px;
-    top: 30px;
+    left: 200px;
+    top: 80px;
     color: white;
     font-size: xx-small;
   }
 
   #status{
     position: absolute;
-    left: 30px;
-    top: 50px;
+    left: 200px;
+    top: 100px;
     color: white;
-    font-size: x-small;
+    font-size: xx-small;
+  }
+
+  #story-name{
+    position: absolute;
+    left: 200px;
+    top: 120px;
+    color: white;
+    font-size: xx-small;
   }
 
   .crosshair {
