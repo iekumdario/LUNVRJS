@@ -20,6 +20,7 @@ var canvas = document.getElementById("renderCanvas");
             coords = JSON.parse(Android.getGeoposition());
         }catch(e){
             phase={phase:1,phaseName:"Full"};
+            coords ={lon:30,lat:40};
         }
 
         var longitude = coords.lon;
@@ -27,16 +28,16 @@ var canvas = document.getElementById("renderCanvas");
         var date = new Date();
         var moonPosition = SunCalc.getMoonPosition(date,latitude,longitude);
         var altitude = moonPosition.altitude;
-        var azimuth = moonPosition.azimuth;
-        var distance = moonPosition.distance/10000;
+        var azimuth = 2*Math.PI - moonPosition.azimuth;
+        var distance = moonPosition.distance;
         var parallacticAngle = moonPosition.parallacticAngle;
 
         var theta = azimuth;
-        var phi = altitude;
-        var moonX = distance*Math.sin(phi)*Math.cos(theta);
-        var moonY = distance*Math.sin(phi)*Math.sin(theta);
-        var moonZ = distance*Math.cos(phi);
-        Android.printTest(moonX+" - "+moonY+" - "+moonZ);
+        var phi = Math.PI/2 - altitude;
+        var moonX = 100*Math.sin(phi)*Math.cos(theta);
+        var moonZ = 100*Math.sin(phi)*Math.sin(theta);
+        var moonY = 100*Math.cos(phi);
+        //Android.printTest(moonX+" - "+moonY+" - "+moonZ);
 
         var createScene = function () {
         
@@ -48,6 +49,9 @@ var canvas = document.getElementById("renderCanvas");
         
             // This targets the camera to scene origin
             camera.setTarget(BABYLON.Vector3.Zero());
+
+            camera.rotation.x = north;
+            //Android.printTest("Norte"+north);
         
             // This attaches the camera to the canvas
             camera.attachControl(canvas, true);
@@ -100,6 +104,23 @@ var canvas = document.getElementById("renderCanvas");
 
         light.intensity = 0.5;
 
+        var makeTextPlane = function(text, color, size) {
+            var dynamicTexture = new BABYLON.DynamicTexture("DynamicTexture", 50, scene, true);
+            dynamicTexture.hasAlpha = true;
+            dynamicTexture.drawText(text, 5, 40, "bold 12px Arial", color , "transparent", true);
+            var plane = new BABYLON.Mesh.CreatePlane("TextPlane", size, scene, true);
+            plane.material = new BABYLON.StandardMaterial("TextPlaneMaterial", scene);
+            plane.material.backFaceCulling = false;
+            plane.material.specularColor = new BABYLON.Color3(0, 0, 0);
+            plane.material.diffuseTexture = dynamicTexture;
+            return plane;
+            };
+
+
+        var textPlaneTexture = makeTextPlane("Hola mundo", "red", 10);
+        textPlaneTexture.position = new BABYLON.Vector3(sphere.position.x, sphere.position.y-15, sphere.position.z);
+        textPlaneTexture.lookAt(new BABYLON.Vector3(camera.position.x,camera.position.y,camera.position.z),0, 0, 0);
+
         switch (phase.phase) {
             case 0:
                 light.direction = new BABYLON.Vector3(0, 0, 0);
@@ -135,7 +156,7 @@ var canvas = document.getElementById("renderCanvas");
         
         var scene = createScene();
 
-        document.getElementById("phase").innerHTML=phase.phaseName+" Moon"+"<br>date:"+date+"<br>La:"+latitude+"<br>Lo:"+longitude+"<br> x:"+moonX+"<br> y:"+moonY+"<br> z:"+moonZ+"<br> az:"+azimuth+"<br> d:"+distance+"<br> al:"+altitude;
+        document.getElementById("phase").innerHTML=phase.phaseName+" Moon"+"<br>date:"+date+"<br>La:"+latitude+"<br>Lo:"+longitude+"<br> x:"+moonX+"<br> y:"+moonY+"<br> z:"+moonZ+"<br> az:"+azimuth+"<br> d:"+distance+"<br> al:"+altitude+"<br> north:"+north;
 
         engine.runRenderLoop(function () {
             if (lines.intersectsMesh(sphere, false)) {
