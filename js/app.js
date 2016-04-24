@@ -6,7 +6,37 @@ var canvas = document.getElementById("renderCanvas");
         var phase;
         var sphere;
         var camera;
-        var lines;
+		var lines;
+        var north;
+        var coords;
+
+        try{
+            //phase object with phase name and index
+            phase = JSON.parse(Android.getMoonPhase());
+            //magnetic north
+            north = Android.getNorth();
+            //coords.lon longitude
+            //coords.lat latitude
+            coords = JSON.parse(Android.getGeoposition());
+        }catch(e){
+            phase={phase:1,phaseName:"Full"};
+        }
+
+        var longitude = coords.lon;
+        var latitude = coords.lat;
+        var date = new Date();
+        var moonPosition = SunCalc.getMoonPosition(date,latitude,longitude);
+        var altitude = moonPosition.altitude;
+        var azimuth = moonPosition.azimuth;
+        var distance = moonPosition.distance/10000;
+        var parallacticAngle = moonPosition.parallacticAngle;
+
+        var theta = azimuth;
+        var phi = altitude;
+        var moonX = distance*Math.sin(phi)*Math.cos(theta);
+        var moonY = distance*Math.sin(phi)*Math.sin(theta);
+        var moonZ = distance*Math.cos(phi);
+        Android.printTest(moonX+" - "+moonY+" - "+moonZ);
 
         var createScene = function () {
         
@@ -40,8 +70,6 @@ var canvas = document.getElementById("renderCanvas");
             materialSphere1.bumpTexture = new BABYLON.Texture("js/texture/moonbump.png", scene);
             materialSphere1.specularPower = 0;
 
-            ray = new BABYLON.Ray(sphere.positions, new BABYLON.Vector3(0, -1, 0));
-
             sphere.material = materialSphere1;
 
             var skybox = BABYLON.Mesh.CreateBox("skyBox", 10000.0, scene);
@@ -70,13 +98,6 @@ var canvas = document.getElementById("renderCanvas");
             sphere.checkCollisions = true;
             lines.checkCollisions = true;
 
-            try{
-                var test = Android.getMoonPhase();
-                phase = JSON.parse(test);
-                Android.printPosition(phase.phaseName);
-            }catch(e){
-                phase={phase:1,phaseName:"Full"};
-            }
         light.intensity = 0.5;
 
         switch (phase.phase) {
@@ -107,27 +128,21 @@ var canvas = document.getElementById("renderCanvas");
                 break;
             default:break;
         }
-
+			sphere.position=new BABYLON.Vector3(moonX,moonY,moonZ);
             return scene;
         
         }
         
         var scene = createScene();
 
-        document.getElementById("phase").innerHTML=phase.phaseName;
-
-        var pointToIntersect = new BABYLON.Vector3(camera.x, camera.y, camera.z+45);
+        document.getElementById("phase").innerHTML=phase.phaseName+" Moon"+"<br>date:"+date+"<br>La:"+latitude+"<br>Lo:"+longitude+"<br> x:"+moonX+"<br> y:"+moonY+"<br> z:"+moonZ+"<br> az:"+azimuth+"<br> d:"+distance+"<br> al:"+altitude;
 
         engine.runRenderLoop(function () {
             if (lines.intersectsMesh(sphere, false)) {
-                  console.log("In");
-                } else {
-                  console.log("Out");
-                }
-            x+=0.002;
-            z+=0.001;
 
-            sphere.position=new BABYLON.Vector3(Math.cos(x)*45,Math.sin(x)*45,Math.sin(z)*45);
+                } else {
+
+                }
             scene.render();
         });
 
