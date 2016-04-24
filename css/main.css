@@ -10,3 +10,28 @@
     width: 100%;
     height: 100%;
   }
+
+  #phase{
+    position: absolute;
+    left: 30px;
+    top: 30px;
+    color: white;
+  }
+
+  #crosshairL {
+    position: absolute;
+    left: 29%;
+    top: 50%;
+    width: 5px;
+    height: 5px;
+    background-color: white;
+  }
+
+  #crosshairR {
+    position: absolute;
+    right: 29%;
+    top: 50%;
+    width: 5px;
+    height: 5px;
+    background-color: white;
+  }

@@ -5,13 +5,15 @@ var canvas = document.getElementById("renderCanvas");
         var y = 0;
         var phase;
         var sphere;
+        var camera;
+
         var createScene = function () {
         
             // This creates a basic Babylon Scene object (non-mesh)
             var scene = new BABYLON.Scene(engine);
         
             // This creates and positions a free camera (non-mesh)
-            var camera = new BABYLON.VRDeviceOrientationFreeCamera("Camera", new BABYLON.Vector3 (0, 5, -20), scene, 0);
+            camera = new BABYLON.VRDeviceOrientationFreeCamera("Camera", new BABYLON.Vector3 (0, 0, 0), scene, 0);
         
             // This targets the camera to scene origin
             camera.setTarget(BABYLON.Vector3.Zero());
@@ -35,7 +37,7 @@ var canvas = document.getElementById("renderCanvas");
             //materialSphere1.diffuseColor = new BABYLON.Color3(0, 1, 0.35);
             materialSphere1.diffuseTexture = new BABYLON.Texture("js/texture/moon.jpg", scene);
             materialSphere1.bumpTexture = new BABYLON.Texture("js/texture/moonbump.png", scene);
-            materialSphere1.specularPower = 100;
+            materialSphere1.specularPower = 0;
 
             sphere.material = materialSphere1;
             var skybox = BABYLON.Mesh.CreateBox("skyBox", 100.0, scene);
@@ -55,10 +57,10 @@ var canvas = document.getElementById("renderCanvas");
                 phase = JSON.parse(test);
                 Android.printPosition(phase.phaseName);
             }catch(e){
-                phase = {phase:1};
+                phase={phase:1,phaseName:"Full"};
             }
 
-                    switch (phase.phase) {
+        switch (phase.phase) {
             case 0:
                 light.direction = new BABYLON.Vector3(0, 0, 0);
                 light.intensity = 0.1;
@@ -93,16 +95,19 @@ var canvas = document.getElementById("renderCanvas");
                 break;
             default:break;
         }
+
             return scene;
         
-        };
+        }
         
         var scene = createScene();
+
+        document.getElementById("phase").innerHTML=phase.phaseName;
 
         engine.runRenderLoop(function () {
             x+=0.002;
             z+=0.0020;
-            sphere.position=new BABYLON.Vector3(Math.cos(x)*25,0,Math.sin(x)*20-15);
+            sphere.position=new BABYLON.Vector3(Math.cos(x)*25,0,Math.sin(x)*25);
             scene.render();
         });
 
