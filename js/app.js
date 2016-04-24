@@ -6,6 +6,7 @@ var canvas = document.getElementById("renderCanvas");
         var phase;
         var sphere;
         var camera;
+        var lines;
 
         var createScene = function () {
         
@@ -39,8 +40,11 @@ var canvas = document.getElementById("renderCanvas");
             materialSphere1.bumpTexture = new BABYLON.Texture("js/texture/moonbump.png", scene);
             materialSphere1.specularPower = 0;
 
+            ray = new BABYLON.Ray(sphere.positions, new BABYLON.Vector3(0, -1, 0));
+
             sphere.material = materialSphere1;
-            var skybox = BABYLON.Mesh.CreateBox("skyBox", 100.0, scene);
+
+            var skybox = BABYLON.Mesh.CreateBox("skyBox", 10000.0, scene);
             var skyboxMaterial = new BABYLON.StandardMaterial("skyBox", scene);
             skyboxMaterial.backFaceCulling = false;
             skyboxMaterial.disableLighting = true;
@@ -52,6 +56,20 @@ var canvas = document.getElementById("renderCanvas");
             skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture("js/texture/"+currentSky+"/skybox", scene);
             skyboxMaterial.reflectionTexture.coordinatesMode = BABYLON.Texture.SKYBOX_MODE;
 
+            scene.collisionsEnabled = true;
+            camera.checkCollisions = true;
+
+
+            lines = BABYLON.Mesh.CreateLines("lineMesh", [
+            new BABYLON.Vector3(0, 0, 2),
+            new BABYLON.Vector3(0, 0, 50)
+            ], scene);
+            lines.material.alpha = 1;
+            lines.parent = camera;
+
+            sphere.checkCollisions = true;
+            lines.checkCollisions = true;
+
             try{
                 var test = Android.getMoonPhase();
                 phase = JSON.parse(test);
@@ -59,6 +77,7 @@ var canvas = document.getElementById("renderCanvas");
             }catch(e){
                 phase={phase:1,phaseName:"Full"};
             }
+        light.intensity = 0.5;
 
         switch (phase.phase) {
             case 0:
@@ -67,31 +86,24 @@ var canvas = document.getElementById("renderCanvas");
                 break;
             case 1:
                 light.direction = new BABYLON.Vector3(30, 0, 30);
-                light.intensity = 0.5;
                 break;
             case 2:
                 light.direction = new BABYLON.Vector3(30, 0, 10);
-                light.intensity = 0.5;
                 break;
             case 3:
                 light.direction = new BABYLON.Vector3(30, 0, -10);
-                light.intensity = 0.5;
                 break;
             case 4:
                 light.direction = new BABYLON.Vector3(10, 0, -30);
-                light.intensity = 0.5;
                 break;
             case 5:
                 light.direction = new BABYLON.Vector3(-20, 0, -20);
-                light.intensity = 0.5;
                 break;
             case 6:
                 light.direction = new BABYLON.Vector3(-30, 0, 0);
-                light.intensity = 0.5;
                 break;
             case 7:
                 light.direction = new BABYLON.Vector3(-30, 0, 30);
-                light.intensity = 0.5;
                 break;
             default:break;
         }
@@ -104,10 +116,18 @@ var canvas = document.getElementById("renderCanvas");
 
         document.getElementById("phase").innerHTML=phase.phaseName;
 
+        var pointToIntersect = new BABYLON.Vector3(camera.x, camera.y, camera.z+45);
+
         engine.runRenderLoop(function () {
+            if (lines.intersectsMesh(sphere, false)) {
+                  console.log("In");
+                } else {
+                  console.log("Out");
+                }
             x+=0.002;
-            z+=0.0020;
-            sphere.position=new BABYLON.Vector3(Math.cos(x)*25,0,Math.sin(x)*25);
+            z+=0.001;
+
+            sphere.position=new BABYLON.Vector3(Math.cos(x)*45,Math.sin(x)*45,Math.sin(z)*45);
             scene.render();
         });
 
