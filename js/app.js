@@ -1,6 +1,5 @@
 var canvas = document.getElementById("renderCanvas");
         var engine = new BABYLON.Engine(canvas, true);
-       //engine.setHardwareScalingLevel();
         var x = 0;
         var z = 0;
         var y = 0;
@@ -16,6 +15,8 @@ var canvas = document.getElementById("renderCanvas");
         const MOON_SIZE = 1736.482;
         var planePic;
         var imageSelected = false;
+        var android = false;
+        var vr = false;
 
         try{
             //phase object with phase name and index
@@ -25,6 +26,8 @@ var canvas = document.getElementById("renderCanvas");
             //coords.lon longitude
             //coords.lat latitude
             coords = JSON.parse(Android.getGeoposition());
+            //vr = Android.useVR();
+            android = true;
         }catch(e){
             phase = { phase:1, phaseName:"Full"} ;
             coords = { lon:30, lat:40};
@@ -52,8 +55,13 @@ var canvas = document.getElementById("renderCanvas");
             var scene = new BABYLON.Scene(engine);
         
             // This creates and positions a free camera (non-mesh)
-            camera = new BABYLON.VRDeviceOrientationFreeCamera("Camera", new BABYLON.Vector3 (0, 0, 0), scene, 0);
-        
+            if(vr){
+                camera = new BABYLON.VRDeviceOrientationFreeCamera("Camera", new BABYLON.Vector3 (0, 0, 0), scene, 0);
+            }else{
+                document.getElementById("crosshair2").style.visibility = "hidden";
+                document.getElementById("crosshair1").className = "crosshair-center";
+                camera = new BABYLON.UniversalCamera("Camera", new BABYLON.Vector3 (0, 0, 0), scene, 0);
+            }
             // This targets the camera to scene origin
             camera.setTarget(BABYLON.Vector3.Zero());
 
@@ -179,14 +187,14 @@ var canvas = document.getElementById("renderCanvas");
                 textPlaneTexture.lookAt(new BABYLON.Vector3(camera.position.x,camera.position.y,camera.position.z),0, 0, 0);
                 planePic = BABYLON.Mesh.CreatePlane("plane", 500.0, scene);
                 var material = new BABYLON.StandardMaterial("texture", scene);
-                material.diffuseTexture = new BABYLON.Texture("js/texture/"+stories[currentStory].imgurl, scene);
+                material.diffuseTexture = new BABYLON.Texture("img/"+stories[currentStory].imgurl, scene);
                 material.emissiveColor = new BABYLON.Color3(255,255,255);
                 planePic.material = material;
                 planePic.position = new BABYLON.Vector3(sphere.position.x/10-700, sphere.position.y/10, sphere.position.z/10);
                 var audiofileurl="audio/s"+(currentStory+1)+".wav";
-                try{
+                if(android){
                     Android.playSound(audiofileurl);
-                }catch(e){
+                }else{
                     var audio = new Audio(audiofileurl);
                     audio.play();
                 }
@@ -194,7 +202,7 @@ var canvas = document.getElementById("renderCanvas");
                 found=true;
             }
 
-            if ( found && !imageSelected){
+            if ( found && !imageSelected ){
                if (lines.intersectsMesh(planePic, true)){
                    planePic.position.z-=500;
                    imageSelected=true;
