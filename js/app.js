@@ -16,7 +16,6 @@ var canvas = document.getElementById("renderCanvas");
         var planePic;
         var imageSelected = false;
         var android = false;
-        var vr = false;
 
         try{
             //phase object with phase name and index
@@ -26,14 +25,13 @@ var canvas = document.getElementById("renderCanvas");
             //coords.lon longitude
             //coords.lat latitude
             coords = JSON.parse(Android.getGeoposition());
-            //vr = Android.useVR();
             android = true;
         }catch(e){
             phase = { phase:1, phaseName:"Full"} ;
             coords = { lon:30, lat:40};
             north = -1;
         }
-
+        //calculate position of the moon
         var longitude = coords.lon;
         var latitude = coords.lat;
         var date = new Date();
@@ -55,7 +53,7 @@ var canvas = document.getElementById("renderCanvas");
             var scene = new BABYLON.Scene(engine);
         
             // This creates and positions a free camera (non-mesh)
-            if(vr){
+            if(isMobile.any){
                 camera = new BABYLON.VRDeviceOrientationFreeCamera("Camera", new BABYLON.Vector3 (0, 0, 0), scene, 0);
             }else{
                 document.getElementById("crosshair2").style.visibility = "hidden";
