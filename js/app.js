@@ -28,7 +28,7 @@ var canvas = document.getElementById("renderCanvas");
             android = true;
         }catch(e){
             phase = { phase:1, phaseName:"Full"} ;
-            coords = { lon:30, lat:40};
+            coords = { lon:300, lat:400};
             north = -1;
         }
         //calculate position of the moon
@@ -46,6 +46,19 @@ var canvas = document.getElementById("renderCanvas");
         var moonX = distance*Math.sin(phi)*Math.cos(theta);
         var moonZ = distance*Math.sin(phi)*Math.sin(theta);
         var moonY = distance*Math.cos(phi);
+
+		        var makeTextPlane = function(text, color, size) {
+		            var dynamicTexture = new BABYLON.DynamicTexture("DynamicTexture", 250, scene, true);
+		            dynamicTexture.hasAlpha = true;
+		            dynamicTexture.drawText(text, null, 100, "20px Arial", color, "transparent", true);
+		            dynamicTexture.drawText(phase.phaseName + " Moon", null, 150, "20px Arial", color, "transparent", true);
+		            var plane = new BABYLON.Mesh.CreatePlane("TextPlane", size, scene, true);
+		            plane.material = new BABYLON.StandardMaterial("TextPlaneMaterial", scene);
+		            plane.material.backFaceCulling = false;
+		            plane.material.specularColor = new BABYLON.Color3(0, 0, 0);
+		            plane.material.diffuseTexture = dynamicTexture;
+		            return plane;
+		        };
 
         var createScene = function () {
         
@@ -89,6 +102,26 @@ var canvas = document.getElementById("renderCanvas");
 
             sphere.material = materialSphere1;
 
+		        var makeTextPlane2 = function(text, color, size) {
+		            var dynamic = new BABYLON.DynamicTexture("TTexture", 250, scene, true);
+		            dynamic.hasAlpha = true;
+		            dynamic.drawText(text, null, 100, "20px Arial", color, "transparent", true);
+		            var plane = new BABYLON.Mesh.CreatePlane("TextPlane", size, scene, true);
+		            plane.material = new BABYLON.StandardMaterial("TextPlaneMaterial", scene);
+		            plane.material.backFaceCulling = false;
+		            plane.material.specularColor = new BABYLON.Color3(0, 0, 0);
+		            plane.material.diffuseTexture = dynamic;
+		            return plane;
+		        };
+
+		find = makeTextPlane2("Find the moon", "white", 250);
+               	find.position = new BABYLON.Vector3(camera.position.x, camera.position.y, camera.position.z+500);
+                find.material.emissiveColor = new BABYLON.Color3(255,255,255);
+                find.lookAt(new BABYLON.Vector3(camera.position.x,camera.position.y,camera.position.z),0, 0, 0);
+		find.parent = camera;
+
+		setTimeout(function() { find.dispose(); }, 10000);
+
             var skybox = BABYLON.Mesh.CreateBox("skyBox", 10000.0, scene);
             var skyboxMaterial = new BABYLON.StandardMaterial("skyBox", scene);
             skyboxMaterial.backFaceCulling = false;
@@ -103,7 +136,6 @@ var canvas = document.getElementById("renderCanvas");
 
             scene.collisionsEnabled = true;
             camera.checkCollisions = true;
-
 
             lines = BABYLON.Mesh.CreateLines("lineMesh", [
             new BABYLON.Vector3(0, 0, 0),
@@ -160,22 +192,9 @@ var canvas = document.getElementById("renderCanvas");
         scene = createScene();
 
 
-        var makeTextPlane = function(text, color, size) {
-            var dynamicTexture = new BABYLON.DynamicTexture("DynamicTexture", 250, scene, true);
-            dynamicTexture.hasAlpha = true;
-            dynamicTexture.drawText(text, null, 100, "20px Arial", color, "transparent", true);
-            dynamicTexture.drawText(phase.phaseName + " Moon", null, 150, "20px Arial", color, "transparent", true);
-            var plane = new BABYLON.Mesh.CreatePlane("TextPlane", size, scene, true);
-            plane.material = new BABYLON.StandardMaterial("TextPlaneMaterial", scene);
-            plane.material.backFaceCulling = false;
-            plane.material.specularColor = new BABYLON.Color3(0, 0, 0);
-            plane.material.diffuseTexture = dynamicTexture;
-            return plane;
-        };
-
-
         engine.runRenderLoop(function () {
             scene.render();
+
             if ((lines.intersectsMesh(sphere, true)) && (!found)){
                 currentStory=getRandomIntInclusive(0, 2);
 
@@ -183,12 +202,14 @@ var canvas = document.getElementById("renderCanvas");
                 textPlaneTexture.position = new BABYLON.Vector3(sphere.position.x/10, sphere.position.y/10+200, sphere.position.z/10);
                 textPlaneTexture.material.emissiveColor = new BABYLON.Color3(255,255,255);
                 textPlaneTexture.lookAt(new BABYLON.Vector3(camera.position.x,camera.position.y,camera.position.z),0, 0, 0);
+
                 planePic = BABYLON.Mesh.CreatePlane("plane", 500.0, scene);
                 var material = new BABYLON.StandardMaterial("texture", scene);
                 material.diffuseTexture = new BABYLON.Texture("img/"+stories[currentStory].imgurl, scene);
                 material.emissiveColor = new BABYLON.Color3(255,255,255);
                 planePic.material = material;
                 planePic.position = new BABYLON.Vector3(sphere.position.x/10-700, sphere.position.y/10, sphere.position.z/10);
+
                 var audiofileurl="audio/s"+(currentStory+1)+".wav";
                 if(android){
                     Android.playSound(audiofileurl);
